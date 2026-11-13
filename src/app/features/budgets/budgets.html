@@ -1,0 +1,121 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">{{ month() }}</span>
+      <h1>Presupuestos</h1>
+      <app-squiggle />
+    </div>
+    @if (available().length) {
+      <button type="button" class="icon-btn add" (click)="openNew()" aria-label="Nuevo presupuesto">
+        <app-icon name="plus" [size]="26" [stroke]="3" />
+      </button>
+    }
+  </header>
+
+  @if (store.status().length) {
+    <section class="card card--deep overview">
+      <app-sparks class="ov-sparks" [size]="40" />
+      <small class="ov-label">Gastado del total</small>
+      <p class="ov-big num">{{ store.totals().spent | clp }}</p>
+      <p class="ov-of">de {{ store.totals().limit | clp }}</p>
+      <div
+        class="bar ov-bar"
+        [class.is-warn]="store.totals().ratio >= 0.8 && store.totals().ratio <= 1"
+        [class.is-over]="store.totals().ratio > 1"
+      >
+        <i [style.width.%]="width(store.totals().ratio)"></i>
+      </div>
+      <div class="ov-stats">
+        <div>
+          <strong class="num">{{ daysLeft() }}</strong>
+          <small>{{ daysLeft() === 1 ? 'día queda' : 'días quedan' }}</small>
+        </div>
+        <div>
+          <strong class="num">{{ perDay() | clp }}</strong>
+          <small>puedes gastar al día</small>
+        </div>
+      </div>
+    </section>
+
+    <div class="list">
+      @for (s of store.status(); track s.budget.categoryId) {
+        <button
+          type="button"
+          class="card budget"
+          [class.is-over]="s.state === 'over'"
+          (click)="openEdit(s.budget.categoryId, s.budget.limit)"
+        >
+          <div class="b-top">
+            <span class="cat-dot" [style.background]="'color-mix(in srgb, var(--cat-' + s.category.color + ') 28%, var(--surface))'">
+              {{ s.category.emoji }}
+            </span>
+            <div class="b-name">
+              <strong>{{ s.category.name }}</strong>
+              <small>
+                @if (s.remaining >= 0) {
+                  Te quedan {{ s.remaining | clp }}
+                } @else {
+                  Te pasaste por {{ -s.remaining | clp }}
+                }
+              </small>
+            </div>
+            <span class="b-pct num">{{ s.ratio * 100 | number: '1.0-0' }}%</span>
+          </div>
+          <div class="bar" [class.is-warn]="s.state === 'warn'" [class.is-over]="s.state === 'over'">
+            <i [style.width.%]="width(s.ratio)"></i>
+          </div>
+          <div class="b-foot">
+            <span class="num">{{ s.spent | clp }}</span>
+            <span class="num">{{ s.budget.limit | clp }}</span>
+          </div>
+          @if (s.state === 'over') {
+            <span class="sticker over-sticker">¡Ojo! 🔥</span>
+          } @else if (s.state === 'warn') {
+            <span class="sticker warn-sticker">Casi al tope</span>
+          }
+        </button>
+      }
+    </div>
+  } @else if (store.loaded()) {
+    <section class="card card--brand intro">
+      <span class="intro-emoji">🎯</span>
+      <h2>Ponle tope a tus gastos</h2>
+      <p>Define cuánto quieres gastar al mes en cada categoría. Te avisamos cuando te acerques al límite.</p>
+      <button type="button" class="btn btn--navy" (click)="openNew()">
+        <app-icon name="plus" [size]="20" [stroke]="3" /> Crear presupuesto
+      </button>
+    </section>
+  }
+</div>
+
+@if (editor(); as e) {
+  <app-sheet [title]="e.isNew ? 'Nuevo presupuesto' : 'Editar presupuesto'" (closed)="editor.set(null)">
+    <div class="editor">
+      @if (e.isNew) {
+        <div class="field">
+          <span>Categoría</span>
+          <div class="pick">
+            @for (c of available(); track c.id) {
+              <button type="button" class="chip" [attr.aria-pressed]="e.categoryId === c.id" (click)="patch({ categoryId: c.id })">
+                {{ c.emoji }} {{ c.name }}
+              </button>
+            }
+          </div>
+        </div>
+      } @else {
+        <p class="ed-cat">{{ cats.get(e.categoryId!)?.emoji }} {{ cats.get(e.categoryId!)?.name }}</p>
+      }
+      <app-money-input label="Límite mensual" [value]="e.limit" (valueChange)="patch({ limit: $event })" />
+      <div class="ed-actions">
+        @if (!e.isNew) {
+          <button type="button" class="btn btn--ghost del" (click)="remove()" aria-label="Eliminar presupuesto">
+            <app-icon name="trash" [size]="22" />
+          </button>
+        }
+        <button type="button" class="btn btn--navy btn--block" [disabled]="!e.categoryId || e.limit <= 0" (click)="save()">
+          <app-icon name="check" [size]="22" [stroke]="3" /> Guardar
+        </button>
+      </div>
+    </div>
+  </app-sheet>
+}

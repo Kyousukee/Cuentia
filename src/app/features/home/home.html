@@ -1,0 +1,159 @@
+<div class="page">
+  <header class="top">
+    <div class="brand">
+      <app-mark [size]="46" />
+      <div>
+        <span class="hello">{{ greeting() }}</span>
+        <strong class="word">Cuentia</strong>
+      </div>
+    </div>
+    <a class="icon-btn" routerLink="/ajustes" aria-label="Ajustes"><app-icon name="gear" [size]="22" /></a>
+  </header>
+
+  <!-- HERO: balance -->
+  <section class="hero card card--deep" aria-labelledby="bal-title">
+    <svg class="hero-c" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <linearGradient id="heroG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#5be07a" />
+          <stop offset="1" stop-color="#0e8f7e" />
+        </linearGradient>
+      </defs>
+      <path d="M160 52A78 78 0 1 0 164 146" stroke="url(#heroG)" stroke-width="34" stroke-linecap="round" fill="none" />
+    </svg>
+    <app-sparks class="hero-sparks" [size]="44" />
+
+    <div class="hero-top">
+      <h2 id="bal-title" class="label">Balance total</h2>
+      <span class="sticker">{{ month() }}</span>
+    </div>
+    <p class="balance num" [class.neg]="txs.balance() < 0">{{ txs.balance() | clp }}</p>
+    @if (savingRate() !== null) {
+      <p class="rate">
+        @if (savingRate()! >= 0) {
+          Te queda el <b>{{ savingRate() }}%</b> de lo que ganaste este mes 🚀
+        } @else {
+          Gastaste <b>{{ -savingRate()! }}%</b> más de lo que ganaste este mes 😬
+        }
+      </p>
+    }
+
+    <div class="tiles">
+      <button type="button" class="tile tile--in" (click)="ui.openNewTx('income')">
+        <span class="tile-ico"><app-icon name="up" [size]="18" [stroke]="3" /></span>
+        <small>Ingresos</small>
+        <strong class="num">{{ txs.thisMonthTotals().income | clp }}</strong>
+      </button>
+      <button type="button" class="tile tile--out" (click)="ui.openNewTx('expense')">
+        <span class="tile-ico"><app-icon name="down" [size]="18" [stroke]="3" /></span>
+        <small>Gastos</small>
+        <strong class="num">{{ txs.thisMonthTotals().expense | clp }}</strong>
+      </button>
+    </div>
+  </section>
+
+  @if (txs.loaded() && !txs.all().length) {
+    <section class="card card--mint welcome">
+      <div class="empty">
+        <span class="empty-emoji">🌱</span>
+        <h3>¡Partamos!</h3>
+        <p>Anota tu primer gasto o ingreso y Cuentia hará las cuentas por ti.</p>
+        <button type="button" class="btn btn--navy" (click)="ui.openNewTx()">
+          <app-icon name="plus" [size]="20" [stroke]="3" /> Agregar movimiento
+        </button>
+      </div>
+    </section>
+  } @else {
+    <!-- Gastos del mes -->
+    @if (slices().length) {
+      <section class="card spend">
+        <div class="section-title">
+          <h2>¿En qué se fue?</h2>
+          <a routerLink="/resumen">Resumen →</a>
+        </div>
+        <div class="spend-body">
+          <app-donut [slices]="slices()" [size]="150" caption="Gastado" />
+          <ul class="spend-list">
+            @for (s of topSpend().slice(0, 4); track s.category.id) {
+              <li>
+                <i class="sw" [style.background]="'var(--cat-' + s.category.color + ')'"></i>
+                <span class="nm">{{ s.category.emoji }} {{ s.category.name }}</span>
+                <span class="num">{{ s.share * 100 | number: '1.0-0' }}%</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+    }
+
+    <!-- Presupuesto -->
+    <a class="card card--brand budget-teaser" routerLink="/presupuestos">
+      @if (budgets.status().length) {
+        <div class="bt-row">
+          <div>
+            <small>Presupuesto del mes</small>
+            <strong class="num">{{ budgets.totals().spent | clp }}</strong>
+            <span class="of">de {{ budgets.totals().limit | clp }}</span>
+          </div>
+          <span class="bt-pct num">{{ budgets.totals().ratio * 100 | number: '1.0-0' }}%</span>
+        </div>
+        <div
+          class="bar"
+          [class.is-warn]="budgets.totals().ratio >= 0.8 && budgets.totals().ratio <= 1"
+          [class.is-over]="budgets.totals().ratio > 1"
+        >
+          <i [style.width.%]="budgets.totals().ratio * 100 > 100 ? 100 : budgets.totals().ratio * 100"></i>
+        </div>
+      } @else {
+        <div class="bt-row">
+          <div>
+            <small>Presupuestos</small>
+            <strong class="bt-cta">Ponle tope a tus gastos</strong>
+          </div>
+          <span class="bt-arrow"><app-icon name="right" [size]="26" [stroke]="3" /></span>
+        </div>
+      }
+    </a>
+
+    <!-- Metas -->
+    <section class="goals">
+      <div class="section-title">
+        <h2>Metas de ahorro</h2>
+        <a routerLink="/metas">Ver todas →</a>
+      </div>
+      <div class="goal-rail">
+        @for (g of goals.all(); track g.goal.id) {
+          <a class="goal card" routerLink="/metas">
+            <app-ring [value]="g.progress" [size]="72">
+              <span class="goal-emoji">{{ g.goal.emoji }}</span>
+            </app-ring>
+            <strong>{{ g.goal.name }}</strong>
+            <span class="num">{{ g.progress * 100 | number: '1.0-0' }}%</span>
+          </a>
+        }
+        <a class="goal goal--new card" routerLink="/metas" [queryParams]="{ nueva: 1 }">
+          <span class="plus"><app-icon name="plus" [size]="30" [stroke]="3" /></span>
+          <strong>Nueva meta</strong>
+        </a>
+      </div>
+    </section>
+
+    <!-- Recientes -->
+    <section class="card recent">
+      <div class="section-title">
+        <h2>Últimos movimientos</h2>
+        <a routerLink="/movimientos">Ver todo →</a>
+      </div>
+      <div class="list">
+        @for (t of txs.recent(); track t.id) {
+          <app-tx-row [tx]="t" />
+        }
+      </div>
+    </section>
+  }
+
+  <footer class="tagline">
+    <span>Tus cuentas, más simples.</span>
+    <app-squiggle />
+  </footer>
+</div>

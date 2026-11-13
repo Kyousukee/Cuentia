@@ -1,0 +1,86 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">Tus números, claritos</span>
+      <h1>Resumen</h1>
+      <app-squiggle />
+    </div>
+  </header>
+
+  <app-month-switcher [(month)]="month" [max]="txs.currentMonth()" />
+
+  <div class="stats">
+    <div class="stat stat--net">
+      <small>Neto del mes</small>
+      <strong class="num">{{ t().net | clp: 'signed' }}</strong>
+    </div>
+    <div class="stat">
+      <small>Promedio diario</small>
+      <strong class="num">{{ dailyAvg() | clp }}</strong>
+    </div>
+    <div class="stat stat--big">
+      <small>Gasto más grande</small>
+      @if (biggest(); as b) {
+        <strong class="num">{{ b.amount | clp }}</strong>
+        <span class="b-note">{{ b.cat }} {{ b.note }}</span>
+      } @else {
+        <strong class="num">—</strong>
+      }
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="section-title">
+      <h2>Por categoría</h2>
+    </div>
+    <div class="kind" role="group" aria-label="Tipo">
+      <button type="button" class="chip" [attr.aria-pressed]="kind() === 'expense'" (click)="setKind('expense')">
+        Gastos
+      </button>
+      <button type="button" class="chip" [attr.aria-pressed]="kind() === 'income'" (click)="setKind('income')">
+        Ingresos
+      </button>
+    </div>
+
+    @if (donut().length) {
+      <app-donut [slices]="donut()" [size]="230" [caption]="kind() === 'expense' ? 'Gastado' : 'Ingresado'" [(selected)]="selected" />
+
+      <table class="legend">
+        <caption class="visually-hidden">Detalle por categoría</caption>
+        <thead class="visually-hidden">
+          <tr><th>Categoría</th><th>Monto</th><th>Porcentaje</th></tr>
+        </thead>
+        <tbody>
+          @for (s of slices(); track s.category.id) {
+            <tr
+              [class.is-on]="selected() === s.category.id"
+              [class.is-dim]="selected() && selected() !== s.category.id"
+              (click)="selected.set(selected() === s.category.id ? null : s.category.id)"
+            >
+              <td class="l-name">
+                <i class="sw" [style.background]="'var(--cat-' + s.category.color + ')'"></i>
+                <span>{{ s.category.emoji }} {{ s.category.name }}</span>
+                <small>{{ s.count }} mov.</small>
+              </td>
+              <td class="num l-amt">{{ s.total | clp }}</td>
+              <td class="num l-pct">{{ s.share * 100 | number: '1.0-0' }}%</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="empty">
+        <span class="empty-emoji">📊</span>
+        <p>Sin {{ kind() === 'expense' ? 'gastos' : 'ingresos' }} registrados este mes.</p>
+      </div>
+    }
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <h2>Últimos 6 meses</h2>
+    </div>
+    <p class="hint">Toca un mes para ver el detalle.</p>
+    <app-month-bars [data]="series()" />
+  </section>
+</div>

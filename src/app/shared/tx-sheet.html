@@ -1,0 +1,82 @@
+<app-sheet [title]="editing ? 'Editar movimiento' : 'Nuevo movimiento'" (closed)="close()">
+  <div class="tx" (keydown)="onKey($event)" tabindex="-1">
+    <div class="kind" role="radiogroup" aria-label="Tipo de movimiento">
+      <button
+        type="button"
+        role="radio"
+        class="kind-btn kind-btn--out"
+        [attr.aria-checked]="kind() === 'expense'"
+        (click)="kind.set('expense')"
+      >
+        <app-icon name="down" [size]="20" [stroke]="3" /> Gasto
+      </button>
+      <button
+        type="button"
+        role="radio"
+        class="kind-btn kind-btn--in"
+        [attr.aria-checked]="kind() === 'income'"
+        (click)="kind.set('income')"
+      >
+        <app-icon name="up" [size]="20" [stroke]="3" /> Ingreso
+      </button>
+    </div>
+
+    <output class="amount" [class.is-empty]="!amount()" [class.is-in]="kind() === 'income'" aria-live="polite">
+      <span class="sign">$</span>
+      @for (b of [bump()]; track b) {
+        <span class="value num">{{ display() }}</span>
+      }
+    </output>
+
+    <div class="cats" role="radiogroup" aria-label="Categoría">
+      @for (c of options(); track c.id) {
+        <button
+          type="button"
+          role="radio"
+          class="cat"
+          [attr.aria-checked]="categoryId() === c.id"
+          [style.--c]="'var(--cat-' + c.color + ')'"
+          (click)="categoryId.set(c.id)"
+        >
+          <span class="cat-emoji">{{ c.emoji }}</span>
+          <span class="cat-name">{{ c.name }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Fecha</span>
+        <input type="date" [(ngModel)]="date" name="date" required />
+      </label>
+      <label class="field">
+        <span>Nota</span>
+        <input type="text" [(ngModel)]="note" name="note" placeholder="Opcional" maxlength="80" enterkeyhint="done" />
+      </label>
+    </div>
+
+    <div class="pad">
+      @for (k of keys; track k) {
+        <button type="button" class="key" [class.key--del]="k === 'del'" (click)="press(k)" [attr.aria-label]="k === 'del' ? 'Borrar' : k">
+          @if (k === 'del') {
+            <app-icon name="delete" [size]="26" />
+          } @else {
+            {{ k }}
+          }
+        </button>
+      }
+    </div>
+
+    <div class="actions">
+      @if (editing) {
+        <button type="button" class="btn btn--ghost del" (click)="remove()" aria-label="Eliminar movimiento">
+          <app-icon name="trash" [size]="22" />
+        </button>
+      }
+      <button type="button" class="btn btn--navy btn--block save" [disabled]="!canSave()" (click)="save()">
+        <app-icon name="check" [size]="22" [stroke]="3" />
+        {{ editing ? 'Guardar cambios' : kind() === 'income' ? 'Guardar ingreso' : 'Guardar gasto' }}
+      </button>
+    </div>
+  </div>
+</app-sheet>

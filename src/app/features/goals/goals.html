@@ -1,0 +1,126 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">Paso a paso</span>
+      <h1>Metas</h1>
+      <app-squiggle />
+    </div>
+    <button type="button" class="icon-btn add" (click)="openNew()" aria-label="Nueva meta">
+      <app-icon name="plus" [size]="26" [stroke]="3" />
+    </button>
+  </header>
+
+  @if (store.all().length) {
+    <section class="card card--brand total">
+      <app-sparks class="t-sparks" color="var(--navy)" [size]="38" />
+      <small>Llevas ahorrado</small>
+      <p class="num">{{ store.totalSaved() | clp }}</p>
+      <span class="sticker">{{ store.all().length }} {{ store.all().length === 1 ? 'meta' : 'metas' }}</span>
+    </section>
+
+    <div class="list">
+      @for (v of store.all(); track v.goal.id) {
+        <article class="card goal" [class.is-done]="v.done" [style.--g]="'var(--cat-' + v.goal.color + ')'">
+          <div class="g-top">
+            <app-ring [value]="v.progress" [size]="92">
+              <span class="g-emoji">{{ v.goal.emoji }}</span>
+            </app-ring>
+            <div class="g-info">
+              <h2>{{ v.goal.name }}</h2>
+              <p class="g-saved num">{{ v.saved | clp }}</p>
+              <p class="g-of">de {{ v.goal.target | clp }} · <b>{{ v.progress * 100 | number: '1.0-0' }}%</b></p>
+              @if (deadlineText(v); as dt) {
+                <span class="g-dead">⏳ {{ dt }}</span>
+              }
+            </div>
+            <button type="button" class="icon-btn g-edit" (click)="openEdit(v)" [attr.aria-label]="'Editar ' + v.goal.name">
+              <app-icon name="edit" [size]="20" />
+            </button>
+          </div>
+          @if (v.done) {
+            <span class="sticker done">¡Lograda! 🏆</span>
+          } @else {
+            <p class="g-rem">Te faltan <b class="num">{{ v.remaining | clp }}</b></p>
+          }
+          <button type="button" class="btn btn--block g-add" (click)="openContrib(v)">
+            <app-icon name="plus" [size]="20" [stroke]="3" /> Aportar o retirar
+          </button>
+        </article>
+      }
+    </div>
+  } @else if (store.loaded()) {
+    <section class="card card--deep intro">
+      <span class="intro-emoji">🏖️</span>
+      <h2>¿Para qué estás ahorrando?</h2>
+      <p>Unas vacaciones, un auto, un fondo de emergencia... Crea una meta y ve cómo se llena.</p>
+      <button type="button" class="btn" (click)="openNew()">
+        <app-icon name="plus" [size]="20" [stroke]="3" /> Crear mi primera meta
+      </button>
+    </section>
+  }
+</div>
+
+@if (editor(); as e) {
+  <app-sheet [title]="e.id ? 'Editar meta' : 'Nueva meta'" (closed)="editor.set(null)">
+    <div class="editor">
+      <div class="emoji-grid" role="group" aria-label="Ícono">
+        @for (em of emojis; track em) {
+          <button type="button" class="em" [attr.aria-pressed]="e.emoji === em" (click)="patch({ emoji: em })">{{ em }}</button>
+        }
+      </div>
+      <label class="field">
+        <span>Nombre</span>
+        <input type="text" [ngModel]="e.name" (ngModelChange)="patch({ name: $event })" placeholder="Ej: Viaje al sur" maxlength="40" />
+      </label>
+      <app-money-input label="¿Cuánto necesitas?" [value]="e.target" (valueChange)="patch({ target: $event })" />
+      <label class="field">
+        <span>Fecha límite (opcional)</span>
+        <input type="date" [ngModel]="e.deadline" (ngModelChange)="patch({ deadline: $event || null })" />
+      </label>
+      <div class="field">
+        <span>Color</span>
+        <div class="colors" role="group" aria-label="Color">
+          @for (c of colors; track c) {
+            <button
+              type="button"
+              class="sw"
+              [style.background]="'var(--cat-' + c + ')'"
+              [attr.aria-pressed]="e.color === c"
+              [attr.aria-label]="'Color ' + c"
+              (click)="patch({ color: c })"
+            ></button>
+          }
+        </div>
+      </div>
+      <div class="ed-actions">
+        @if (e.id) {
+          <button type="button" class="btn btn--ghost del" (click)="removeGoal()" aria-label="Eliminar meta">
+            <app-icon name="trash" [size]="22" />
+          </button>
+        }
+        <button type="button" class="btn btn--navy btn--block" [disabled]="!e.name.trim() || e.target <= 0" (click)="saveGoal()">
+          <app-icon name="check" [size]="22" [stroke]="3" /> Guardar meta
+        </button>
+      </div>
+    </div>
+  </app-sheet>
+}
+
+@if (contrib(); as c) {
+  <app-sheet [title]="c.view.goal.emoji + ' ' + c.view.goal.name" (closed)="contrib.set(null)">
+    <div class="editor">
+      <p class="c-info">
+        Llevas <b class="num">{{ c.view.saved | clp }}</b> de <b class="num">{{ c.view.goal.target | clp }}</b>
+      </p>
+      <app-money-input label="Monto" [value]="c.amount" (valueChange)="contrib.set({ view: c.view, amount: $event })" />
+      <div class="c-actions">
+        <button type="button" class="btn btn--ghost" [disabled]="c.amount <= 0 || c.view.saved <= 0" (click)="applyContrib(-1)">
+          <app-icon name="down" [size]="20" [stroke]="3" /> Retirar
+        </button>
+        <button type="button" class="btn" [disabled]="c.amount <= 0" (click)="applyContrib(1)">
+          <app-icon name="up" [size]="20" [stroke]="3" /> Aportar
+        </button>
+      </div>
+    </div>
+  </app-sheet>
+}

@@ -1,0 +1,382 @@
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+}
+
+.hello {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.word {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: -0.02em;
+}
+
+.dot {
+  position: absolute;
+  top: 1px;
+  right: -11px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #8ff0a4, var(--green));
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  overflow: hidden;
+  padding: 22px 20px 20px;
+  border-radius: var(--r-xl);
+  box-shadow: 6px 8px 0 var(--green);
+  isolation: isolate;
+}
+
+.hero-c {
+  position: absolute;
+  z-index: -1;
+  width: 250px;
+  height: 250px;
+  right: -104px;
+  top: -70px;
+  opacity: 0.9;
+  transform: rotate(-12deg);
+}
+
+.hero-sparks {
+  position: absolute;
+  z-index: -1;
+  right: 132px;
+  top: 8px;
+}
+
+.hero-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  .label {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #b9f5c8;
+  }
+}
+
+.balance {
+  margin: 14px 0 4px;
+  font-size: clamp(44px, 14vw, 64px);
+  line-height: 0.95;
+  color: #fff;
+  text-shadow: 3px 4px 0 rgba(0, 0, 0, 0.35);
+  overflow-wrap: anywhere;
+
+  &.neg {
+    color: #ffb4a0;
+  }
+}
+
+.rate {
+  font-weight: 700;
+  font-size: 15px;
+  color: #d5deea;
+  max-width: 30ch;
+
+  b {
+    color: var(--lime);
+  }
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 3px solid var(--ink);
+  border-radius: var(--r-md);
+  color: var(--navy);
+  text-align: left;
+  box-shadow: 0 4px 0 var(--ink);
+  transition: transform 120ms var(--ease-out), box-shadow 120ms;
+
+  &:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  small {
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  strong {
+    font-size: 20px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+}
+
+.tile--in {
+  background: var(--lime);
+}
+
+.tile--out {
+  background: #ff8a4c;
+}
+
+.tile-ico {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  background: var(--navy);
+  color: #fff;
+}
+
+/* ---------- Gasto por categoría ---------- */
+.spend-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.spend-list {
+  flex: 1;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .sw {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+  }
+
+  .nm {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .num {
+    font-size: 16px;
+  }
+}
+
+/* ---------- Presupuesto ---------- */
+.budget-teaser {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  transform: rotate(-1deg);
+  transition: transform 200ms var(--ease-spring);
+
+  &:active {
+    transform: rotate(0) scale(0.98);
+  }
+
+  small {
+    display: block;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  strong.num {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .of {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .bar {
+    background: rgba(255, 255, 255, 0.55);
+
+    > i {
+      background: var(--navy);
+    }
+  }
+}
+
+.bt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bt-pct {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.bt-cta {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.bt-arrow {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  border: 3px solid var(--ink);
+  background: var(--sun);
+}
+
+/* ---------- Metas ---------- */
+.goals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 18px;
+  padding: 4px 18px 12px;
+  margin: 0 -18px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.goal {
+  flex: none;
+  width: 136px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px 14px;
+  text-align: center;
+  text-decoration: none;
+  scroll-snap-align: start;
+  border-radius: var(--r-md);
+
+  &:nth-child(odd) {
+    transform: rotate(-1.5deg);
+  }
+
+  &:nth-child(even) {
+    transform: rotate(1.5deg);
+  }
+
+  strong {
+    font-weight: 800;
+    font-size: 15px;
+    line-height: 1.15;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .num {
+    font-size: 18px;
+    color: var(--link);
+  }
+}
+
+.goal-emoji {
+  font-size: 26px;
+}
+
+.goal--new {
+  justify-content: center;
+  background: transparent;
+  border-style: dashed;
+  box-shadow: none;
+
+  .plus {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--lime);
+    color: var(--navy);
+    border: 3px solid var(--ink);
+  }
+}
+
+/* ---------- Recientes ---------- */
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 8px -6px 0;
+}
+
+.tagline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6px;
+  color: var(--text-3);
+  font-weight: 700;
+
+  app-squiggle {
+    width: 140px;
+    height: 12px;
+    color: var(--green);
+  }
+}
