@@ -14,7 +14,7 @@ interface Tab {
   imports: [RouterLink, RouterLinkActive, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nav class="bar" aria-label="Principal">
+    <nav class="tabbar" aria-label="Principal">
       @for (t of left; track t.path) {
         <a class="tab" [routerLink]="t.path" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: t.path === '/' }" #rla="routerLinkActive" [attr.aria-current]="rla.isActive ? 'page' : null">
           <span class="ico"><app-icon [name]="t.icon" [size]="24" /></span>
@@ -42,7 +42,7 @@ interface Tab {
       padding: 0 12px calc(var(--safe-bottom) + 10px);
       pointer-events: none;
     }
-    .bar {
+    .tabbar {
       pointer-events: auto;
       max-width: 520px;
       margin: 0 auto;
@@ -93,22 +93,28 @@ interface Tab {
       justify-self: center;
       display: grid;
       place-items: center;
-      width: 68px;
-      height: 68px;
-      margin-top: -34px;
+      width: 70px;
+      height: 70px;
       border-radius: 24px;
       border: 3px solid var(--ink);
       background: var(--brand-gradient);
       color: var(--navy);
-      box-shadow: 0 5px 0 var(--ink);
-      transform: rotate(-6deg);
-      transition: transform 200ms var(--ease-spring), box-shadow 120ms;
+      /* anillo del color de fondo para que se despegue de la barra */
+      box-shadow:
+        0 0 0 5px var(--bg),
+        0 10px 0 2px var(--ink);
+      transform: translateY(-30px) rotate(-6deg);
+      transition:
+        transform 200ms var(--ease-spring),
+        box-shadow 120ms;
     }
     .fab:active {
-      transform: rotate(0deg) translateY(4px) scale(0.96);
-      box-shadow: 0 1px 0 var(--ink);
+      transform: translateY(-26px) rotate(0deg) scale(0.96);
+      box-shadow:
+        0 0 0 5px var(--bg),
+        0 4px 0 2px var(--ink);
     }
-    :host-context([data-theme='dark']) .bar {
+    :host-context([data-theme='dark']) .tabbar {
       background: #0a1226;
     }
   `,
