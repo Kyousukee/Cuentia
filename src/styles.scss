@@ -69,6 +69,42 @@ a {
   color: inherit;
 }
 
+/* ---------- Scrollbars con la marca ---------- */
+// Firefox (Chrome/Safari usan los pseudo-elementos de abajo)
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--green) transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 10px 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-gradient);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lime);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
 :focus-visible {
   outline: 3px solid var(--lime);
   outline-offset: 3px;
