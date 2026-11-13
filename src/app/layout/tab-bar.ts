@@ -103,13 +103,13 @@ interface Tab {
       box-shadow:
         0 0 0 5px var(--bg),
         0 10px 0 2px var(--ink);
-      transform: translateY(-30px) rotate(-6deg);
+      transform: translateY(-18px) rotate(-6deg);
       transition:
         transform 200ms var(--ease-spring),
         box-shadow 120ms;
     }
     .fab:active {
-      transform: translateY(-26px) rotate(0deg) scale(0.96);
+      transform: translateY(-14px) rotate(0deg) scale(0.96);
       box-shadow:
         0 0 0 5px var(--bg),
         0 4px 0 2px var(--ink);
