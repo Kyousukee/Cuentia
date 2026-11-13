@@ -31,14 +31,6 @@ export class TransactionsStore {
   readonly recent = computed(() => this.all().slice(0, 5));
   readonly last6Months = computed(() => monthlySeries(this.all(), this.currentMonth(), 6));
 
-  constructor() {
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') this.currentMonth.set(monthKey(today()));
-      });
-    }
-  }
-
   async add(draft: TransactionDraft): Promise<string> {
     const id = uid();
     await db.transactions.add({ ...draft, amount: Math.round(draft.amount), id, createdAt: Date.now() });

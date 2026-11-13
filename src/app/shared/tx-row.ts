@@ -13,8 +13,13 @@ import { UiService } from './ui.service';
     <button type="button" class="row" (click)="ui.openEditTx(tx())">
       <span class="cat-dot" [style.background]="tint()">{{ cat()?.emoji ?? '❔' }}</span>
       <span class="txt">
-        <strong>{{ tx().note || cat()?.name || 'Sin categoría' }}</strong>
-        <small>{{ tx().note ? cat()?.name : '' }}{{ tx().note && showDate() ? ' · ' : '' }}{{ showDate() ? day() : '' }}</small>
+        <strong>
+          @if (tx().planId) {
+            <span class="auto" title="Pago automático">🔁</span>
+          }
+          {{ tx().note || cat()?.name || 'Sin categoría' }}
+        </strong>
+        <small>{{ sub() }}</small>
       </span>
       <span class="amt num" [class.is-in]="tx().kind === 'income'">
         {{ (tx().kind === 'income' ? tx().amount : -tx().amount) | clp: 'signed' }}
@@ -58,6 +63,10 @@ import { UiService } from './ui.service';
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .auto {
+      font-size: 13px;
+      margin-right: 2px;
+    }
     .txt small:empty {
       display: none;
     }
@@ -90,4 +99,11 @@ export class TxRow {
     return `color-mix(in srgb, var(--cat-${c}) 28%, var(--surface))`;
   });
   protected readonly day = computed(() => dayLabel(this.tx().date));
+  /** Subtítulo: categoría (si no se repite con la nota) y fecha. */
+  protected readonly sub = computed(() => {
+    const t = this.tx();
+    const name = this.cat()?.name ?? '';
+    const parts = [t.note && t.note !== name ? name : '', this.showDate() ? this.day() : ''];
+    return parts.filter(Boolean).join(' · ');
+  });
 }

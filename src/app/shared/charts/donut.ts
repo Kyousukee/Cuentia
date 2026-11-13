@@ -156,3 +156,25 @@ export class Donut {
     this.selected.set(this.selected() === id ? null : id);
   }
 }
+
+export const OTHER_ID = '__otros';
+
+/**
+ * La paleta validada tiene 8 colores: se muestran hasta (max - 1) categorías con color propio
+ * y el resto (o las que repiten color) se agrupan en "Otras" con un gris neutro.
+ */
+export function groupSlices(slices: DonutSlice[], max = 7): DonutSlice[] {
+  const sorted = [...slices].sort((a, b) => b.value - a.value);
+  const used = new Set<number>();
+  const keep: DonutSlice[] = [];
+  const rest: DonutSlice[] = [];
+  for (const s of sorted) {
+    const fits = sorted.length <= max || keep.length < max - 1;
+    if (fits && !used.has(s.color)) {
+      used.add(s.color);
+      keep.push(s);
+    } else rest.push(s);
+  }
+  if (!rest.length) return keep;
+  return [...keep, { id: OTHER_ID, label: 'Otras', emoji: '🗂️', value: rest.reduce((a, x) => a + x.value, 0), color: 0 }];
+}

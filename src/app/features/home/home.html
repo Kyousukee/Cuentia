@@ -115,6 +115,30 @@
       }
     </a>
 
+    <!-- Pagos fijos -->
+    <a class="card fixed" routerLink="/pagos">
+      <div class="fx-head">
+        <h2>Pagos fijos</h2>
+        <span class="fx-arrow"><app-icon name="right" [size]="22" [stroke]="3" /></span>
+      </div>
+      <div class="fx-grid">
+        <div class="fx fx--in">
+          <small>💼 Sueldo</small>
+          @if (plans.salary()[0]; as s) {
+            <strong class="num">{{ s.plan.amount | clp }}</strong>
+            <span>{{ s.next ? 'Llega el ' + fmtDay(s.next.date) : 'En pausa' }}</span>
+          } @else {
+            <strong class="fx-cta">Configurar</strong>
+          }
+        </div>
+        <div class="fx fx--out">
+          <small>💳 Cuotas al mes</small>
+          <strong class="num">{{ plans.monthlyCommitments() | clp }}</strong>
+          <span>{{ plans.loans().length + plans.installments().length }} activas</span>
+        </div>
+      </div>
+    </a>
+
     <!-- Metas -->
     <section class="goals">
       <div class="section-title">

@@ -53,12 +53,12 @@
         <tbody>
           @for (s of slices(); track s.category.id) {
             <tr
-              [class.is-on]="selected() === s.category.id"
-              [class.is-dim]="selected() && selected() !== s.category.id"
-              (click)="selected.set(selected() === s.category.id ? null : s.category.id)"
+              [class.is-on]="selected() === donutId(s.category.id)"
+              [class.is-dim]="selected() && selected() !== donutId(s.category.id)"
+              (click)="selected.set(selected() === donutId(s.category.id) ? null : donutId(s.category.id))"
             >
               <td class="l-name">
-                <i class="sw" [style.background]="'var(--cat-' + s.category.color + ')'"></i>
+                <i class="sw" [style.background]="donutId(s.category.id) === OTHER ? 'var(--cat-0)' : 'var(--cat-' + s.category.color + ')'"></i>
                 <span>{{ s.category.emoji }} {{ s.category.name }}</span>
                 <small>{{ s.count }} mov.</small>
               </td>

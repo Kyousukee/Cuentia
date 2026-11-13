@@ -5,8 +5,10 @@ import { byCategory } from '../../core/analytics';
 import { BudgetsStore } from '../../core/budgets.store';
 import { CategoriesStore } from '../../core/categories.store';
 import { GoalsStore } from '../../core/goals.store';
+import { PlansStore } from '../../core/plans.store';
 import { TransactionsStore } from '../../core/transactions.store';
-import { monthLabel } from '../../core/util';
+import { monthLabel, parseISODate } from '../../core/util';
+import { groupSlices } from '../../shared/charts/donut';
 import { Donut, DonutSlice } from '../../shared/charts/donut';
 import { Ring } from '../../shared/charts/ring';
 import { ClpPipe } from '../../shared/clp.pipe';
@@ -27,6 +29,7 @@ export class Home {
   protected readonly budgets = inject(BudgetsStore);
   protected readonly goals = inject(GoalsStore);
   protected readonly ui = inject(UiService);
+  protected readonly plans = inject(PlansStore);
   private readonly cats = inject(CategoriesStore);
 
   protected readonly month = computed(() => monthLabel(this.txs.currentMonth()));
@@ -37,18 +40,22 @@ export class Home {
 
   protected readonly topSpend = computed(() => byCategory(this.txs.thisMonth(), this.cats.all(), 'expense'));
   protected readonly slices = computed<DonutSlice[]>(() =>
-    this.topSpend().map((s) => ({
+    groupSlices(this.topSpend().map((s) => ({
       id: s.category.id,
       label: s.category.name,
       emoji: s.category.emoji,
       value: s.total,
       color: s.category.color,
-    })),
+    }))),
   );
 
   /** Porcentaje de ingresos del mes que sigue disponible. */
   protected readonly savingRate = computed(() => {
     const t = this.txs.thisMonthTotals();
-    return t.income > 0 ? Math.round((t.net / t.income) * 100) : null;
+    return t.income > 0 ? Math.trunc((t.net / t.income) * 100) : null;
   });
+
+  protected fmtDay(date: string): string {
+    return new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short' }).format(parseISODate(date));
+  }
 }

@@ -1,0 +1,287 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">Sueldo, créditos y cuotas</span>
+      <h1>Pagos fijos</h1>
+      <app-squiggle />
+    </div>
+    <button type="button" class="icon-btn add" (click)="chooser.set(true)" aria-label="Agregar pago fijo">
+      <app-icon name="plus" [size]="26" [stroke]="3" />
+    </button>
+  </header>
+
+  <!-- HERO -->
+  <section class="card card--deep hero">
+    <app-sparks class="hero-sparks" [size]="40" />
+    <small class="h-label">Sale cada mes en cuotas</small>
+    <p class="h-big num">{{ store.monthlyCommitments() | clp }}</p>
+    @if (store.monthlySalary() > 0) {
+      <p class="h-free">
+        @if (free() >= 0) {
+          Después de cuotas te quedan <b class="num">{{ free() | clp }}</b> de tu sueldo
+        } @else {
+          Tus cuotas superan tu sueldo por <b class="num">{{ -free() | clp }}</b> 😬
+        }
+      </p>
+    }
+    <div class="h-tiles">
+      <div class="h-tile h-tile--in">
+        <small>Sueldo</small>
+        <strong class="num">{{ store.monthlySalary() | clp }}</strong>
+      </div>
+      <div class="h-tile h-tile--debt">
+        <small>Deuda pendiente</small>
+        <strong class="num">{{ store.totalDebt() | clp }}</strong>
+      </div>
+    </div>
+    @if (nextOut(); as n) {
+      <span class="sticker h-next">Próximo pago: {{ relDay(n.charge.date) }}</span>
+    }
+  </section>
+
+  <!-- SUELDO -->
+  <section class="block">
+    <div class="section-title">
+      <h2>💼 Sueldo</h2>
+    </div>
+    @for (s of store.salary(); track s.plan.id) {
+      <article class="card card--brand salary" [class.is-paused]="s.plan.paused">
+        <div class="sal-top">
+          <span class="sal-emoji">{{ s.plan.emoji }}</span>
+          <div class="sal-info">
+            <strong>{{ s.plan.name }}</strong>
+            <p class="num">{{ s.plan.amount | clp }}</p>
+          </div>
+          <button type="button" class="icon-btn" (click)="openEdit(s)" [attr.aria-label]="'Editar ' + s.plan.name">
+            <app-icon name="edit" [size]="20" />
+          </button>
+        </div>
+        <div class="sal-foot">
+          @if (s.plan.paused) {
+            <span>⏸️ En pausa</span>
+          } @else {
+            <span>🗓️ Se deposita el día <b>{{ s.plan.day }}</b></span>
+            @if (s.next) {
+              <span>Próximo: <b>{{ fmtDate(s.next.date) }}</b></span>
+            }
+          }
+          <button type="button" class="link-btn" (click)="togglePause(s.plan)">
+            {{ s.plan.paused ? 'Reactivar' : 'Pausar' }}
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <button type="button" class="card cta" (click)="openNew('salary')">
+        <span class="cta-emoji">💼</span>
+        <span class="cta-txt">
+          <strong>Configura tu sueldo</strong>
+          <small>Ingrésalo una vez y se anota solo cada mes.</small>
+        </span>
+        <app-icon name="right" [size]="24" [stroke]="3" />
+      </button>
+    }
+  </section>
+
+  <!-- CRÉDITOS y CUOTAS -->
+  @for (group of [
+    { title: '🏦 Créditos', items: store.loans(), type: 'loan', empty: 'Agrega tu crédito: total de cuotas, en cuál vas y cuánto pagas.' },
+    { title: '💳 Compras en cuotas', items: store.installments(), type: 'installment', empty: '¿Compraste algo en cuotas? Anótalo y lleva la cuenta.' }
+  ]; track group.type) {
+    <section class="block">
+      <div class="section-title">
+        <h2>{{ group.title }}</h2>
+        @if (group.items.length) {
+          <button type="button" class="link" (click)="openNew($any(group.type))">+ Agregar</button>
+        }
+      </div>
+      @for (s of group.items; track s.plan.id) {
+        <article class="card plan" [class.is-done]="s.finished">
+          <div class="p-top">
+            <app-ring [value]="s.progress" [size]="78">
+              <span class="p-emoji">{{ s.plan.emoji }}</span>
+            </app-ring>
+            <div class="p-info">
+              <strong class="p-name">{{ s.plan.name }}</strong>
+              <span class="p-count num">
+                {{ s.paid }}<small>/{{ s.plan.totalInstallments }}</small>
+                <em>cuotas pagadas</em>
+              </span>
+              <span class="p-amt"><b class="num">{{ s.plan.amount | clp }}</b> al mes · día {{ s.plan.day }}</span>
+            </div>
+            <button type="button" class="icon-btn p-edit" (click)="openEdit(s)" [attr.aria-label]="'Editar ' + s.plan.name">
+              <app-icon name="edit" [size]="20" />
+            </button>
+          </div>
+          @if (s.finished) {
+            <span class="sticker done">¡Pagado completo! 🎉</span>
+          } @else {
+            <div class="p-foot">
+              <span>Te faltan <b class="num">{{ s.debt | clp }}</b></span>
+              @if (s.next) {
+                <span class="p-next">Cuota {{ s.next.installment }} · {{ fmtDate(s.next.date) }}</span>
+              }
+            </div>
+          }
+          @if (s.plan.totalPrice) {
+            <small class="p-price">Precio total {{ s.plan.totalPrice | clp }}</small>
+          }
+        </article>
+      } @empty {
+        <button type="button" class="card cta cta--ghost" (click)="openNew($any(group.type))">
+          <span class="cta-emoji">{{ group.type === 'loan' ? '🏦' : '💳' }}</span>
+          <span class="cta-txt">
+            <strong>{{ group.type === 'loan' ? 'Agregar crédito' : 'Agregar compra en cuotas' }}</strong>
+            <small>{{ group.empty }}</small>
+          </span>
+          <app-icon name="plus" [size]="24" [stroke]="3" />
+        </button>
+      }
+    </section>
+  }
+
+  <!-- PRÓXIMOS -->
+  @if (store.upcoming().length) {
+    <section class="card upcoming">
+      <div class="section-title">
+        <h2>Próximos 30 días</h2>
+      </div>
+      <ul>
+        @for (u of store.upcoming(); track u.plan.id + u.charge.month) {
+          <li>
+            <span class="u-date">
+              <b class="num">{{ u.charge.date.slice(8) }}</b>
+              <small>{{ shortMonth(u.charge.month) }}</small>
+            </span>
+            <span class="u-name">
+              {{ u.plan.emoji }} {{ u.plan.name }}
+              @if (u.charge.installment) {
+                <small>cuota {{ u.charge.installment }}/{{ u.plan.totalInstallments }}</small>
+              }
+            </span>
+            <span class="u-amt num" [class.is-in]="u.plan.type === 'salary'">
+              {{ (u.plan.type === 'salary' ? u.plan.amount : -u.plan.amount) | clp: 'signed' }}
+            </span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>
+
+<!-- Selector de tipo -->
+@if (chooser()) {
+  <app-sheet title="¿Qué quieres agregar?" (closed)="chooser.set(false)">
+    <div class="choose">
+      <button type="button" class="ch ch--salary" (click)="openNew('salary')">
+        <span class="ch-emoji">💼</span>
+        <strong>Sueldo</strong>
+        <small>Se suma solo cada mes</small>
+      </button>
+      <button type="button" class="ch ch--loan" (click)="openNew('loan')">
+        <span class="ch-emoji">🏦</span>
+        <strong>Crédito</strong>
+        <small>Consumo, auto, hipotecario…</small>
+      </button>
+      <button type="button" class="ch ch--inst" (click)="openNew('installment')">
+        <span class="ch-emoji">💳</span>
+        <strong>Compra en cuotas</strong>
+        <small>Pagas algo en X cuotas</small>
+      </button>
+    </div>
+  </app-sheet>
+}
+
+<!-- Editor -->
+@if (editor(); as e) {
+  <app-sheet [title]="(e.id ? 'Editar ' : '') + titles[e.type]" (closed)="editor.set(null)">
+    <div class="editor">
+      <div class="emoji-row" role="group" aria-label="Ícono">
+        @for (em of emojis(); track em) {
+          <button type="button" class="em" [attr.aria-pressed]="e.emoji === em" (click)="patch({ emoji: em })">{{ em }}</button>
+        }
+      </div>
+
+      <label class="field">
+        <span>{{ e.type === 'salary' ? 'Nombre' : e.type === 'loan' ? '¿Qué crédito es?' : '¿Qué compraste?' }}</span>
+        <input
+          type="text"
+          [ngModel]="e.name"
+          (ngModelChange)="patch({ name: $event })"
+          [placeholder]="e.type === 'loan' ? 'Ej: Crédito consumo BancoEstado' : e.type === 'installment' ? 'Ej: Televisor' : 'Sueldo'"
+          maxlength="40"
+        />
+      </label>
+
+      @if (e.type === 'installment') {
+        <app-money-input label="Precio total" [value]="e.totalPrice" (valueChange)="patch({ totalPrice: $event })" />
+      }
+
+      @if (e.type !== 'salary') {
+        <div class="field-row">
+          <label class="field">
+            <span>Total de cuotas</span>
+            <input type="number" inputmode="numeric" min="1" max="600" [ngModel]="e.totalInstallments" (ngModelChange)="patch({ totalInstallments: num($event) })" />
+          </label>
+          <label class="field">
+            <span>{{ e.id ? 'Próxima cuota' : '¿En qué cuota vas?' }}</span>
+            <input type="number" inputmode="numeric" min="1" [attr.max]="e.totalInstallments" [ngModel]="e.current" (ngModelChange)="patch({ current: num($event) })" />
+          </label>
+        </div>
+        <p class="help">Pon la <b>próxima cuota que te toca pagar</b>. Si recién compras, es la 1.</p>
+      }
+
+      <app-money-input
+        [label]="e.type === 'salary' ? 'Monto líquido' : 'Valor de la cuota'"
+        [value]="e.amount"
+        (valueChange)="patch({ amount: $event, amountTouched: true })"
+      />
+
+      <label class="field">
+        <span>{{ e.type === 'salary' ? 'Día en que te depositan' : 'Día de pago' }}</span>
+        <select [ngModel]="e.day" (ngModelChange)="patch({ day: +$event })">
+          @for (d of days; track d) {
+            <option [value]="d">Día {{ d }}{{ d >= 29 ? ' (o último día del mes)' : '' }}</option>
+          }
+        </select>
+      </label>
+
+      @if (e.type === 'salary' && !e.id && dayPassed(e.day)) {
+        <label class="toggle">
+          <input type="checkbox" [ngModel]="e.includeThisMonth" (ngModelChange)="patch({ includeThisMonth: $event })" />
+          <span class="tg" aria-hidden="true"></span>
+          <span>Ya me depositaron este mes — registrarlo</span>
+        </label>
+      }
+
+      @if (e.amount > 0) {
+        <p class="preview">🔁 {{ preview() }}</p>
+      }
+
+      @if (!e.confirmDelete) {
+        <div class="ed-actions">
+          @if (e.id) {
+            <button type="button" class="btn btn--ghost del" (click)="patch({ confirmDelete: true })" aria-label="Eliminar">
+              <app-icon name="trash" [size]="22" />
+            </button>
+          }
+          <button type="button" class="btn btn--navy btn--block" [disabled]="!valid()" (click)="save()">
+            <app-icon name="check" [size]="22" [stroke]="3" /> Guardar
+          </button>
+        </div>
+      } @else {
+        <div class="confirm">
+          <p><b>¿Eliminar {{ e.name }}?</b> Dejará de registrarse cada mes.</p>
+          <label class="toggle">
+            <input type="checkbox" [ngModel]="e.deleteTxs" (ngModelChange)="patch({ deleteTxs: $event })" />
+            <span class="tg" aria-hidden="true"></span>
+            <span>Borrar también los movimientos ya registrados</span>
+          </label>
+          <div class="ed-actions">
+            <button type="button" class="btn btn--ghost btn--block" (click)="patch({ confirmDelete: false })">Cancelar</button>
+            <button type="button" class="btn btn--danger btn--block" (click)="remove()">Eliminar</button>
+          </div>
+        </div>
+      }
+    </div>
+  </app-sheet>
+}

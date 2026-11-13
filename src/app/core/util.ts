@@ -64,3 +64,17 @@ export function daysUntil(date: string): number {
   const ms = parseISODate(date).getTime() - parseISODate(today()).getTime();
   return Math.round(ms / 86_400_000);
 }
+
+/** Meses entre dos `YYYY-MM` (b − a). */
+export function monthsBetween(a: string, b: string): number {
+  const [ya, ma] = a.split('-').map(Number);
+  const [yb, mb] = b.split('-').map(Number);
+  return (yb - ya) * 12 + (mb - ma);
+}
+
+/** Fecha `YYYY-MM-DD` del día `day` en el mes `YYYY-MM`, ajustada al último día si no existe. */
+export function dateInMonth(month: string, day: number): string {
+  const [y, m] = month.split('-').map(Number);
+  const last = new Date(y, m, 0).getDate();
+  return `${month}-${String(Math.min(Math.max(1, day), last)).padStart(2, '0')}`;
+}

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BackupService } from '../../core/backup.service';
+import { PlansStore } from '../../core/plans.store';
 import { SettingsStore, ThemePref } from '../../core/settings.store';
 import { TransactionsStore } from '../../core/transactions.store';
 import { Mark, Squiggle } from '../../shared/deco';
@@ -32,6 +33,15 @@ import { UiService } from '../../shared/ui.service';
           }
         </div>
       </section>
+
+      <a class="card fixed-link" routerLink="/pagos">
+        <span class="fl-emoji">🔁</span>
+        <span class="fl-txt">
+          <strong>Pagos fijos</strong>
+          <small>Sueldo, créditos y compras en cuotas</small>
+        </span>
+        <app-icon name="right" [size]="22" [stroke]="3" />
+      </a>
 
       <section class="card card--mint">
         <h2 class="h">📱 Ponla en tu iPhone</h2>
@@ -89,6 +99,30 @@ import { UiService } from '../../shared/ui.service';
       color: var(--link);
       text-decoration: none;
       padding: 6px 0;
+    }
+    .fixed-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      background: var(--sun);
+      color: var(--navy);
+    }
+    .fl-emoji {
+      font-size: 32px;
+    }
+    .fl-txt {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .fl-txt strong {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 20px;
+    }
+    .fl-txt small {
+      font-weight: 700;
     }
     .h {
       font-size: 22px;
@@ -166,6 +200,7 @@ export class Settings {
   protected readonly txs = inject(TransactionsStore);
   private readonly backup = inject(BackupService);
   private readonly ui = inject(UiService);
+  private readonly plans = inject(PlansStore);
 
   protected readonly confirmWipe = signal(false);
   protected readonly themes: { value: ThemePref; label: string; icon: IconName }[] = [
@@ -185,6 +220,7 @@ export class Settings {
     if (!file) return;
     try {
       const n = await this.backup.import(file);
+      await this.plans.sync();
       this.ui.notify(`Respaldo restaurado: ${n} movimientos ✅`);
     } catch (err) {
       this.ui.notify((err as Error).message || 'No se pudo importar el archivo');

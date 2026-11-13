@@ -22,6 +22,10 @@ export interface Transaction {
   date: string;
   note: string;
   createdAt: number;
+  /** Pago fijo que generó este movimiento. */
+  planId?: string;
+  /** Número de cuota (si aplica). */
+  installment?: number;
 }
 
 /** Presupuesto mensual recurrente por categoría de gasto. */
@@ -53,10 +57,38 @@ export interface Setting {
 
 export interface BackupFile {
   app: 'cuentia';
-  version: 1;
+  version: 1 | 2;
   exportedAt: string;
   categories: Category[];
   transactions: Transaction[];
   budgets: Budget[];
   goals: Goal[];
+  plans?: RecurringPlan[];
+}
+
+export type PlanType = 'installment' | 'loan' | 'salary';
+
+/** Pago fijo mensual: compra en cuotas, crédito o sueldo. Genera movimientos solo. */
+export interface RecurringPlan {
+  id: string;
+  type: PlanType;
+  name: string;
+  emoji: string;
+  /** Valor de la cuota o del sueldo (CLP). */
+  amount: number;
+  /** Día del mes (1–31). En meses más cortos se usa el último día. */
+  day: number;
+  categoryId: string;
+  /** Total de cuotas; `null` para el sueldo. */
+  totalInstallments: number | null;
+  /** Número de la cuota que corresponde a `startMonth`. */
+  firstInstallment: number;
+  /** Primer mes a generar, `YYYY-MM`. */
+  startMonth: string;
+  /** Precio total de la compra (informativo). */
+  totalPrice: number | null;
+  /** Último mes ya generado; evita duplicados y que reaparezcan movimientos borrados. */
+  lastGenerated: string | null;
+  paused: boolean;
+  createdAt: number;
 }

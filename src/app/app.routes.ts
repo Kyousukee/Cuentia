@@ -19,6 +19,11 @@ export const routes: Routes = [
   },
   { path: 'metas', title: 'Metas · Cuentia', loadComponent: () => import('./features/goals/goals').then((m) => m.Goals) },
   {
+    path: 'pagos',
+    title: 'Pagos fijos · Cuentia',
+    loadComponent: () => import('./features/plans/plans').then((m) => m.Plans),
+  },
+  {
     path: 'ajustes',
     title: 'Ajustes · Cuentia',
     loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
