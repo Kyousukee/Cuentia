@@ -115,55 +115,57 @@
         </div>
       }
     </a>
+  }
 
-    <!-- Pagos fijos -->
-    <a class="card fixed" routerLink="/pagos">
-      <div class="fx-head">
-        <h2>Pagos fijos</h2>
-        <span class="fx-arrow"><app-icon name="right" [size]="22" [stroke]="3" /></span>
-      </div>
-      <div class="fx-grid">
-        <div class="fx fx--in">
-          <small>💼 Sueldo</small>
-          @if (plans.salary()[0]; as s) {
-            <strong class="num">{{ s.plan.amount | clp }}</strong>
-            <span>{{ s.next ? 'Llega el ' + fmtDay(s.next.date) : 'En pausa' }}</span>
-          } @else {
-            <strong class="fx-cta">Configurar</strong>
-          }
-        </div>
-        <div class="fx fx--out">
-          <small>💳 Cuotas al mes</small>
-          <strong class="num">{{ plans.monthlyCommitments() | clp }}</strong>
-          <span>{{ plans.loans().length + plans.installments().length }} activas</span>
-        </div>
-      </div>
-    </a>
-
-    <!-- Metas -->
-    <section class="goals">
-      <div class="section-title">
-        <h2>Metas de ahorro</h2>
-        <a routerLink="/metas">Ver todas →</a>
-      </div>
-      <div class="goal-rail">
-        @for (g of goals.all(); track g.goal.id) {
-          <a class="goal card" routerLink="/metas">
-            <app-ring [value]="g.progress" [size]="72">
-              <span class="goal-emoji">{{ g.goal.emoji }}</span>
-            </app-ring>
-            <strong>{{ g.goal.name }}</strong>
-            <span class="num">{{ g.progress * 100 | number: '1.0-0' }}%</span>
-          </a>
+  <!-- Pagos fijos y metas: visibles aunque aún no haya movimientos. -->
+  <a class="card fixed" routerLink="/pagos">
+    <div class="fx-head">
+      <h2>Pagos fijos</h2>
+      <span class="fx-arrow"><app-icon name="right" [size]="22" [stroke]="3" /></span>
+    </div>
+    <div class="fx-grid">
+      <div class="fx fx--in">
+        <small>💼 Sueldo</small>
+        @if (plans.salary()[0]; as s) {
+          <strong class="num">{{ s.plan.amount | clp }}</strong>
+          <span>{{ s.next ? 'Llega el ' + fmtDay(s.next.date) : 'En pausa' }}</span>
+        } @else {
+          <strong class="fx-cta">Configurar</strong>
         }
-        <a class="goal goal--new card" routerLink="/metas" [queryParams]="{ nueva: 1 }">
-          <span class="plus"><app-icon name="plus" [size]="30" [stroke]="3" /></span>
-          <strong>Nueva meta</strong>
-        </a>
       </div>
-    </section>
+      <div class="fx fx--out">
+        <small>💳 Cuotas al mes</small>
+        <strong class="num">{{ plans.monthlyCommitments() | clp }}</strong>
+        <span>{{ plans.loans().length + plans.installments().length }} activas</span>
+      </div>
+    </div>
+  </a>
 
-    <!-- Recientes -->
+  <!-- Metas -->
+  <section class="goals">
+    <div class="section-title">
+      <h2>Metas de ahorro</h2>
+      <a routerLink="/metas">Ver todas →</a>
+    </div>
+    <div class="goal-rail">
+      @for (g of goals.all(); track g.goal.id) {
+        <a class="goal card" routerLink="/metas">
+          <app-ring [value]="g.progress" [size]="72">
+            <span class="goal-emoji">{{ g.goal.emoji }}</span>
+          </app-ring>
+          <strong>{{ g.goal.name }}</strong>
+          <span class="num">{{ g.progress * 100 | number: '1.0-0' }}%</span>
+        </a>
+      }
+      <a class="goal goal--new card" routerLink="/metas" [queryParams]="{ nueva: 1 }">
+        <span class="plus"><app-icon name="plus" [size]="30" [stroke]="3" /></span>
+        <strong>Nueva meta</strong>
+      </a>
+    </div>
+  </section>
+
+  <!-- Recientes -->
+  @if (txs.all().length) {
     <section class="card recent">
       <div class="section-title">
         <h2>Últimos movimientos</h2>
