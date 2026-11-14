@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { formatCLP } from '../../core/money';
 import { PlanType, RecurringPlan } from '../../core/models';
 import { nextMonthFor, PlanStatus } from '../../core/plans';
@@ -49,7 +49,7 @@ const dateFmt = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'long'
 
 @Component({
   selector: 'app-plans',
-  imports: [ClpPipe, FormsModule, Icon, Ring, Sheet, MoneyInput, Squiggle, Sparks],
+  imports: [ClpPipe, FormsModule, Icon, Ring, RouterLink, Sheet, MoneyInput, Squiggle, Sparks],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './plans.html',
   styleUrl: './plans.scss',

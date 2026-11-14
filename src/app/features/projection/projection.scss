@@ -1,0 +1,274 @@
+/* ---------- Hero ---------- */
+.hero {
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  box-shadow: 6px 8px 0 var(--green);
+  padding-bottom: 22px;
+}
+
+.hero-sparks {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+}
+
+.h-label {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b9f5c8;
+}
+
+.h-big {
+  margin-top: 8px;
+  font-size: clamp(38px, 12vw, 54px);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 3px 4px 0 rgba(0, 0, 0, 0.35);
+  overflow-wrap: anywhere;
+
+  &.neg {
+    color: #ffb08a;
+  }
+}
+
+.h-note {
+  margin-top: 10px;
+  font-weight: 700;
+  color: #d5deea;
+}
+
+/* ---------- Bloques ---------- */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Mes a mes ---------- */
+.months {
+  list-style: none;
+  margin: 0;
+  padding: 6px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.m-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0;
+  border-top: 2px dashed var(--line);
+
+  &:first-child {
+    border-top: 0;
+  }
+}
+
+.m-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.m-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.m-now {
+  font-size: 11px;
+}
+
+.m-bal {
+  flex: none;
+  font-size: 20px;
+
+  &.neg {
+    color: var(--danger);
+  }
+}
+
+.m-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 14px;
+  font-weight: 700;
+
+  .in {
+    color: var(--income);
+  }
+
+  .out {
+    color: var(--expense);
+  }
+
+  .quiet {
+    color: var(--text-2);
+  }
+}
+
+.m-done {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-2);
+
+  b {
+    color: var(--text);
+  }
+}
+
+/* ---------- Gasto habitual ---------- */
+.variable {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+}
+
+.v-hint {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+
+  b {
+    color: var(--text);
+  }
+}
+
+/* Interruptor (mismo estilo que en Pagos fijos). */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tg {
+    flex: none;
+    position: relative;
+    width: 52px;
+    height: 32px;
+    border: 2.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--surface-2);
+    transition: background-color 180ms;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2.5px solid var(--ink);
+      transition: transform 220ms var(--ease-spring);
+    }
+  }
+
+  input:checked + .tg {
+    background: var(--lime);
+
+    &::after {
+      transform: translateX(20px);
+    }
+  }
+
+  input:focus-visible + .tg {
+    outline: 3px solid var(--lime);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Una fecha ---------- */
+.at {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.at-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 2px dashed var(--line);
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  dt {
+    min-width: 0;
+    font-weight: 700;
+
+    small {
+      color: var(--text-2);
+    }
+  }
+
+  dd {
+    margin: 0;
+    flex: none;
+    font-size: 17px;
+
+    &.in {
+      color: var(--income);
+    }
+
+    &.out {
+      color: var(--expense);
+    }
+  }
+
+  .at-total {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: var(--border);
+
+    dt {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    dd {
+      font-size: 24px;
+
+      &.neg {
+        color: var(--danger);
+      }
+    }
+  }
+}
+
+/* ---------- Gráfica ---------- */
+.chart {
+  padding: 18px 16px 12px;
+}

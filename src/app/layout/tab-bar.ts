@@ -127,6 +127,6 @@ export class TabBar {
   ];
   protected readonly right: Tab[] = [
     { path: '/presupuestos', label: 'Presupuesto', icon: 'wallet' },
-    { path: '/metas', label: 'Metas', icon: 'target' },
+    { path: '/proyeccion', label: 'Proyección', icon: 'trend' },
   ];
 }

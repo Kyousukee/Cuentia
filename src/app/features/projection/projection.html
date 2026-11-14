@@ -1,0 +1,140 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <span class="eyebrow">¿Cuánto tendré?</span>
+      <h1>Proyección</h1>
+      <app-squiggle />
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="card card--deep hero" aria-labelledby="pr-start">
+    <app-sparks class="hero-sparks" [size]="40" />
+    <small id="pr-start" class="h-label">Partes con tu balance de hoy</small>
+    <p class="h-big num" [class.neg]="txs.balance() < 0">{{ txs.balance() | clp }}</p>
+    <p class="h-note">Sumamos tus sueldos y restamos tus créditos y cuotas que vienen.</p>
+  </section>
+
+  @if (isEmpty()) {
+    <section class="card card--mint">
+      <div class="empty">
+        <span class="empty-emoji">🔮</span>
+        <h3>Aún no hay nada que proyectar</h3>
+        <p>Sin pagos fijos activos, tu saldo se mantiene igual mes a mes.</p>
+        <a class="btn btn--navy" routerLink="/pagos">Agrega tu sueldo y tus cuotas en Pagos fijos</a>
+      </div>
+    </section>
+  }
+
+  <!-- GASTO HABITUAL -->
+  <section class="card variable">
+    <label class="toggle">
+      <input
+        type="checkbox"
+        [checked]="settings.projectionVariable()"
+        (change)="settings.projectionVariable.set($any($event.target).checked)"
+        aria-describedby="pr-var-hint"
+      />
+      <span class="tg" aria-hidden="true"></span>
+      <span>Incluir gasto habitual</span>
+    </label>
+    <p id="pr-var-hint" class="v-hint">
+      @if (variableAvg() > 0) {
+        ≈ <b class="num">{{ variableAvg() | clp }}</b> al mes, según tus gastos de los últimos 3 meses (sin pagos fijos).
+        Se descuenta desde el próximo mes.
+      } @else {
+        Aún no hay historial suficiente para estimar tu gasto habitual.
+      }
+    </p>
+  </section>
+
+  <!-- UNA FECHA -->
+  <section class="block" aria-labelledby="pr-date">
+    <div class="section-title">
+      <h2 id="pr-date">En una fecha</h2>
+    </div>
+    <div class="card at">
+      <label class="field">
+        <span>¿Cuánto tendré el…?</span>
+        <input
+          type="date"
+          [min]="minDate()"
+          [max]="maxDate()"
+          [value]="date()"
+          (change)="pickDate($any($event.target))"
+        />
+      </label>
+      <dl class="at-list">
+        <div>
+          <dt>Balance hoy</dt>
+          <dd class="num">{{ at().start | clp }}</dd>
+        </div>
+        <div>
+          <dt>Sueldos <small>({{ at().incomeCount }})</small></dt>
+          <dd class="num in">{{ at().income | clp: 'signed' }}</dd>
+        </div>
+        <div>
+          <dt>Créditos y cuotas <small>({{ at().fixedCount }})</small></dt>
+          <dd class="num out">{{ -at().fixedOut | clp: 'signed' }}</dd>
+        </div>
+        @if (settings.projectionVariable()) {
+          <div>
+            <dt>Gasto habitual <small>({{ at().variableMonths }} {{ at().variableMonths === 1 ? 'mes' : 'meses' }})</small></dt>
+            <dd class="num out">{{ -at().variableOut | clp: 'signed' }}</dd>
+          </div>
+        }
+        <div class="at-total">
+          <dt>Tendrías el {{ dateLabel() }}</dt>
+          <dd class="num" [class.neg]="at().total < 0">{{ at().total | clp }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- MES A MES -->
+  <section class="block" aria-labelledby="pr-months">
+    <div class="section-title">
+      <h2 id="pr-months">Mes a mes</h2>
+    </div>
+    <div class="card chart">
+      <app-balance-bars [data]="chartData()" />
+    </div>
+    <ol class="months card">
+      @for (m of months(); track m.month) {
+        <li class="m-row">
+          <div class="m-head">
+            <span class="m-name">
+              {{ label(m.month) }}
+              @if ($first) {
+                <span class="sticker m-now">Este mes</span>
+              }
+            </span>
+            <strong class="m-bal num" [class.neg]="m.endBalance < 0">{{ m.endBalance | clp }}</strong>
+          </div>
+          <div class="m-flow">
+            @if (m.income) {
+              <span class="in num">{{ m.income | clp: 'signed' }}</span>
+            }
+            @if (m.fixedOut) {
+              <span class="out num">{{ -m.fixedOut | clp: 'signed' }} cuotas</span>
+            }
+            @if (m.variableOut) {
+              <span class="out num">{{ -m.variableOut | clp: 'signed' }} gasto habitual</span>
+            }
+            @if (!m.income && !m.fixedOut && !m.variableOut) {
+              <span class="quiet">Sin movimientos fijos</span>
+            }
+          </div>
+          @if (m.finishing.length) {
+            <p class="m-done">
+              🎉 Terminas:
+              @for (p of m.finishing; track p.id) {
+                <b>{{ p.emoji }} {{ p.name }}</b>{{ $last ? '' : ', ' }}
+              }
+            </p>
+          }
+        </li>
+      }
+    </ol>
+  </section>
+</div>

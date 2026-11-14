@@ -462,3 +462,27 @@
   font-family: var(--font-display);
   font-weight: 600;
 }
+
+/* Enlace a la proyección dentro del hero oscuro. */
+.proj-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 2px solid rgba(91, 224, 122, 0.55);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--lime);
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+
+  &:focus-visible {
+    outline: 3px solid var(--lime);
+    outline-offset: 2px;
+  }
+}

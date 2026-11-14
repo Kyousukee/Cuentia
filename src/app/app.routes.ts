@@ -24,6 +24,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/plans/plans').then((m) => m.Plans),
   },
   {
+    path: 'proyeccion',
+    title: 'Proyección · Cuentia',
+    loadComponent: () => import('./features/projection/projection').then((m) => m.Projection),
+  },
+  {
     path: 'ajustes',
     title: 'Ajustes · Cuentia',
     loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
