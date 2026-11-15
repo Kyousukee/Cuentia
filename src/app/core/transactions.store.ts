@@ -4,7 +4,7 @@ import { db } from './db';
 import { liveSignal } from './live';
 import { Transaction } from './models';
 import { MonthStarts, canStartNext, periodOf, periodStart } from './periods';
-import { shiftMonth, today, uid } from './util';
+import { monthKey, shiftMonth, today, uid } from './util';
 
 export type TransactionDraft = Omit<Transaction, 'id' | 'createdAt'>;
 
@@ -31,6 +31,8 @@ export class TransactionsStore {
   /** Fecha en que empezó el mes actual. */
   readonly currentStart = computed(() => periodStart(this.currentMonth(), this.starts()));
   readonly canStartNext = computed(() => canStartNext(this.today(), this.starts()));
+  /** El mes actual se empezó a mano y el calendario aún no llega a él: se puede volver atrás. */
+  readonly canGoBack = computed(() => this.currentMonth() > monthKey(this.today()));
 
   /** Todos los movimientos, más recientes primero. */
   readonly all = computed(() =>
@@ -73,6 +75,23 @@ export class TransactionsStore {
   async undoStartMonth(month: string): Promise<void> {
     const { [month]: _, ...rest } = this.starts();
     await db.settings.put({ key: MONTH_STARTS_KEY, value: rest });
+  }
+
+  /**
+   * Vuelve al mes anterior: el mes actual (empezado a mano) vuelve a empezar el día 1.
+   * Devuelve el mes deshecho y la fecha en que había empezado, para poder rehacerlo.
+   */
+  async goBackMonth(): Promise<{ month: string; start: string }> {
+    if (!this.canGoBack()) throw new Error('El mes actual no se empezó a mano.');
+    const month = this.currentMonth();
+    const start = this.currentStart();
+    await this.undoStartMonth(month);
+    return { month, start };
+  }
+
+  /** Vuelve a dejar `month` empezando en `start` (para el Deshacer de `goBackMonth`). */
+  async restoreStart(month: string, start: string): Promise<void> {
+    await db.settings.put({ key: MONTH_STARTS_KEY, value: { ...this.starts(), [month]: start } });
   }
 
   async add(draft: TransactionDraft): Promise<string> {

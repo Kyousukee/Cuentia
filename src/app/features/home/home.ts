@@ -36,6 +36,24 @@ export class Home {
   /** Nombre del mes en minúsculas, para frases ("Partiste noviembre con…"). */
   protected readonly monthName = computed(() => monthLabel(this.txs.currentMonth()).split(' ')[0].toLowerCase());
   protected readonly nextMonthName = computed(() => monthLabel(shiftMonth(this.txs.currentMonth(), 1)).split(' ')[0].toLowerCase());
+  protected readonly prevMonthName = computed(() => monthLabel(shiftMonth(this.txs.currentMonth(), -1)).split(' ')[0].toLowerCase());
+
+  /** Deshace un "Empezar mes nuevo": el mes actual vuelve a empezar el día 1. */
+  protected async goBackMonth() {
+    if (this.starting()) return;
+    this.starting.set(true);
+    try {
+      const { month, start } = await this.txs.goBackMonth();
+      const name = monthLabel(shiftMonth(month, -1)).split(' ')[0];
+      this.ui.notify(`Volviste a ${name} ↩`, 'Deshacer', () => this.txs.restoreStart(month, start));
+    } catch (e) {
+      console.error('[Cuentia] Error volviendo al mes anterior', e);
+      this.ui.notify('No se pudo volver al mes anterior');
+    } finally {
+      this.starting.set(false);
+    }
+  }
+
   /** El mes actual se empezó a mano antes del día 1. */
   protected readonly startedEarly = computed(() => !this.txs.currentStart().endsWith('-01'));
   protected readonly starting = signal(false);

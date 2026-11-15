@@ -45,6 +45,13 @@ describe('periods', () => {
     expect(canStartNext('2026-12-01', {})).toBe(false);
   });
 
+  it('al quitar el inicio adelantado, los movimientos vuelven al mes anterior', () => {
+    const txs = [tx('2026-11-26', 50)];
+    expect(inMonth(txs, '2026-12', starts)).toHaveLength(1);
+    expect(inMonth(txs, '2026-11', {})).toHaveLength(1);
+    expect(periodOf('2026-11-26', {})).toBe('2026-11');
+  });
+
   it('periodDays cuenta desde el inicio real del mes', () => {
     expect(periodDays('2026-12', starts, '2026-12-03')).toBe(9);
     expect(periodDays('2026-11', starts, '2026-12-03')).toBe(24);

@@ -49,6 +49,11 @@
           📅 Empezar {{ nextMonthName() }}
         </button>
       }
+      @if (txs.canGoBack()) {
+        <button type="button" class="proj-link" [disabled]="starting()" (click)="goBackMonth()">
+          ↩ Volver a {{ prevMonthName() }}
+        </button>
+      }
     </div>
 
     <div class="tiles">
