@@ -464,13 +464,36 @@
 }
 
 /* Enlace a la proyección dentro del hero oscuro. */
+.opening {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #d5deea;
+
+  b {
+    color: #fff;
+  }
+
+  b.neg {
+    color: #ffb4a0;
+  }
+}
+
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .proj-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   align-self: flex-start;
-  margin-top: 12px;
+  min-height: 36px;
   padding: 6px 12px;
+  background: transparent;
   border: 2px solid rgba(91, 224, 122, 0.55);
   border-radius: 999px;
   font-family: var(--font-display);

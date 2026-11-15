@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { byCategory } from '../../core/analytics';
@@ -7,7 +7,7 @@ import { CategoriesStore } from '../../core/categories.store';
 import { GoalsStore } from '../../core/goals.store';
 import { PlansStore } from '../../core/plans.store';
 import { TransactionsStore } from '../../core/transactions.store';
-import { monthLabel, parseISODate } from '../../core/util';
+import { monthLabel, parseISODate, shiftMonth } from '../../core/util';
 import { groupSlices } from '../../shared/charts/donut';
 import { Donut, DonutSlice } from '../../shared/charts/donut';
 import { Ring } from '../../shared/charts/ring';
@@ -33,6 +33,28 @@ export class Home {
   private readonly cats = inject(CategoriesStore);
 
   protected readonly month = computed(() => monthLabel(this.txs.currentMonth()));
+  /** Nombre del mes en minúsculas, para frases ("Partiste noviembre con…"). */
+  protected readonly monthName = computed(() => monthLabel(this.txs.currentMonth()).split(' ')[0].toLowerCase());
+  protected readonly nextMonthName = computed(() => monthLabel(shiftMonth(this.txs.currentMonth(), 1)).split(' ')[0].toLowerCase());
+  /** El mes actual se empezó a mano antes del día 1. */
+  protected readonly startedEarly = computed(() => !this.txs.currentStart().endsWith('-01'));
+  protected readonly starting = signal(false);
+
+  /** Empieza el mes siguiente hoy (p. ej. el día de pago). Se puede deshacer desde el aviso. */
+  protected async startNextMonth() {
+    if (this.starting()) return;
+    this.starting.set(true);
+    try {
+      const month = await this.txs.startNextMonth();
+      const name = monthLabel(month).split(' ')[0];
+      this.ui.notify(`¡Empezó ${name}! Tu saldo pasa completo 📅`, 'Deshacer', () => this.txs.undoStartMonth(month));
+    } catch (e) {
+      console.error('[Cuentia] Error empezando el mes', e);
+      this.ui.notify('No se pudo empezar el mes nuevo');
+    } finally {
+      this.starting.set(false);
+    }
+  }
   protected readonly greeting = computed(() => {
     const h = new Date().getHours();
     return h < 12 ? '¡Buenos días!' : h < 20 ? '¡Buenas tardes!' : '¡Buenas noches!';

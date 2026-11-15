@@ -64,6 +64,8 @@ export interface BackupFile {
   budgets: Budget[];
   goals: Goal[];
   plans?: RecurringPlan[];
+  /** Meses empezados a mano antes del día 1: `{ 'YYYY-MM': 'YYYY-MM-DD' }`. */
+  monthStarts?: Record<string, string>;
 }
 
 export type PlanType = 'installment' | 'loan' | 'salary';

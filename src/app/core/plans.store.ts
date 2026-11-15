@@ -112,7 +112,7 @@ export class PlansStore {
   private async runSync(): Promise<number> {
     const t = today();
     this.now.set(t);
-    this.txs.currentMonth.set(t.slice(0, 7));
+    this.txs.refreshToday();
     let created = 0;
     await db.transaction('rw', db.plans, db.transactions, async () => {
       const plans = await db.plans.toArray();

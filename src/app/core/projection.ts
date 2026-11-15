@@ -1,5 +1,6 @@
 import { RecurringPlan, Transaction } from './models';
 import { lastMonth } from './plans';
+import { MonthStarts, periodOf } from './periods';
 import { dateInMonth, monthKey, monthsBetween, shiftMonth } from './util';
 
 /** Un cargo o depósito futuro de un plan. */
@@ -39,12 +40,16 @@ export function futureCharges(plans: readonly RecurringPlan[], horizonMonth: str
  * anteriores a `currentMonth`. Divide solo por los meses que tienen algún movimiento;
  * si ninguno tiene, devuelve 0.
  */
-export function variableAverage(txs: readonly Transaction[], currentMonth: string): number {
+export function variableAverage(
+  txs: readonly Transaction[],
+  currentMonth: string,
+  starts: MonthStarts = {},
+): number {
   const months = [1, 2, 3].map((n) => shiftMonth(currentMonth, -n));
   const active = new Set<string>();
   let spent = 0;
   for (const t of txs) {
-    const m = monthKey(t.date);
+    const m = periodOf(t.date, starts);
     if (!months.includes(m)) continue;
     active.add(m);
     if (t.kind === 'expense' && !t.planId) spent += t.amount;

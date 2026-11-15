@@ -43,7 +43,9 @@ export class Projection {
   );
 
   /** Promedio del gasto variable de los 3 meses completos anteriores. */
-  protected readonly variableAvg = computed(() => variableAverage(this.txs.all(), this.txs.currentMonth()));
+  protected readonly variableAvg = computed(() =>
+    variableAverage(this.txs.all(), this.txs.currentMonth(), this.txs.starts()),
+  );
 
   /** Gasto habitual que se aplica: el promedio si el interruptor está encendido. */
   private readonly variableUsed = computed(() => (this.settings.projectionVariable() ? this.variableAvg() : 0));

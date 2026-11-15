@@ -25,9 +25,14 @@
 
     <div class="hero-top">
       <h2 id="bal-title" class="label">Balance total</h2>
-      <span class="sticker">{{ month() }}</span>
+      <span class="sticker">{{ month() }}@if (startedEarly()) { · desde el {{ fmtDay(txs.currentStart()) }}}</span>
     </div>
     <p class="balance num" [class.neg]="txs.balance() < 0">{{ txs.balance() | clp }}</p>
+    @if (txs.loaded() && txs.all().length) {
+      <p class="opening">
+        Partiste {{ monthName() }} con <b class="num" [class.neg]="txs.openingBalance() < 0">{{ txs.openingBalance() | clp }}</b>
+      </p>
+    }
     @if (savingRate() !== null) {
       <p class="rate">
         @if (savingRate()! >= 0) {
@@ -37,7 +42,14 @@
         }
       </p>
     }
-    <a class="proj-link" routerLink="/proyeccion">¿Cuánto tendré? <app-icon name="right" [size]="16" [stroke]="3" /></a>
+    <div class="hero-links">
+      <a class="proj-link" routerLink="/proyeccion">¿Cuánto tendré? <app-icon name="right" [size]="16" [stroke]="3" /></a>
+      @if (txs.canStartNext()) {
+        <button type="button" class="proj-link" [disabled]="starting()" (click)="startNextMonth()">
+          📅 Empezar {{ nextMonthName() }}
+        </button>
+      }
+    </div>
 
     <div class="tiles">
       <button type="button" class="tile tile--in" (click)="ui.openNewTx('income')">

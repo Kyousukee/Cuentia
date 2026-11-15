@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { inMonth, totals } from '../../core/analytics';
 import { CategoriesStore } from '../../core/categories.store';
 import { Transaction, TxKind } from '../../core/models';
@@ -163,7 +163,8 @@ export class Transactions {
   protected readonly ui = inject(UiService);
   private readonly cats = inject(CategoriesStore);
 
-  protected readonly month = signal(this.txs.currentMonth());
+  /** Sigue al mes actual (p. ej. al empezar un mes nuevo), pero se puede cambiar a mano. */
+  protected readonly month = linkedSignal(() => this.txs.currentMonth());
   protected readonly kind = signal<TxKind | null>(null);
   protected readonly cat = signal<string | null>(null);
 
@@ -173,7 +174,7 @@ export class Transactions {
     { value: 'income', label: '↗ Ingresos' },
   ];
 
-  protected readonly monthTxs = computed(() => inMonth(this.txs.all(), this.month()));
+  protected readonly monthTxs = computed(() => inMonth(this.txs.all(), this.month(), this.txs.starts()));
   protected readonly monthTotals = computed(() => totals(this.monthTxs()));
   protected readonly catOptions = computed(() => {
     const k = this.kind();

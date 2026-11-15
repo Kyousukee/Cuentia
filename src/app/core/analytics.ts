@@ -1,5 +1,6 @@
 import { Budget, Category, Goal, Transaction, TxKind } from './models';
-import { monthKey, shiftMonth } from './util';
+import { MonthStarts, periodOf } from './periods';
+import { shiftMonth } from './util';
 
 export interface Totals {
   income: number;
@@ -17,8 +18,9 @@ export function totals(txs: readonly Transaction[]): Totals {
   return { income, expense, net: income - expense };
 }
 
-export function inMonth(txs: readonly Transaction[], month: string): Transaction[] {
-  return txs.filter((t) => monthKey(t.date) === month);
+/** Movimientos del mes `month`, respetando los inicios de mes adelantados. */
+export function inMonth(txs: readonly Transaction[], month: string, starts: MonthStarts = {}): Transaction[] {
+  return txs.filter((t) => periodOf(t.date, starts) === month);
 }
 
 export interface CategorySlice {
@@ -69,11 +71,12 @@ export function monthlySeries(
   txs: readonly Transaction[],
   endMonth: string,
   count: number,
+  starts: MonthStarts = {},
 ): MonthPoint[] {
   const points: MonthPoint[] = [];
   const byMonth = new Map<string, Transaction[]>();
   for (const t of txs) {
-    const k = monthKey(t.date);
+    const k = periodOf(t.date, starts);
     (byMonth.get(k) ?? byMonth.set(k, []).get(k)!).push(t);
   }
   for (let i = count - 1; i >= 0; i--) {

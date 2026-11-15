@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { db } from './db';
 import { BackupFile } from './models';
 import { SEED_CATEGORIES } from './seed';
+import { MONTH_STARTS_KEY } from './transactions.store';
 import { today } from './util';
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +17,7 @@ export class BackupService {
       budgets: await db.budgets.toArray(),
       goals: await db.goals.toArray(),
       plans: await db.plans.toArray(),
+      monthStarts: ((await db.settings.get(MONTH_STARTS_KEY))?.value ?? {}) as Record<string, string>,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const file = new File([blob], `cuentia-respaldo-${today()}.json`, { type: 'application/json' });
@@ -43,8 +45,9 @@ export class BackupService {
     if (data.app !== 'cuentia' || !Array.isArray(data.transactions)) {
       throw new Error('El archivo no es un respaldo válido de Cuentia.');
     }
-    await db.transaction('rw', [db.categories, db.transactions, db.budgets, db.goals, db.plans], async () => {
+    await db.transaction('rw', [db.categories, db.transactions, db.budgets, db.goals, db.plans, db.settings], async () => {
       await Promise.all([db.categories.clear(), db.transactions.clear(), db.budgets.clear(), db.goals.clear(), db.plans.clear()]);
+      await db.settings.put({ key: MONTH_STARTS_KEY, value: data.monthStarts ?? {} });
       await db.categories.bulkPut(SEED_CATEGORIES);
       await db.categories.bulkPut(data.categories ?? []);
       await db.transactions.bulkPut(data.transactions!);
@@ -56,8 +59,9 @@ export class BackupService {
   }
 
   async wipe(): Promise<void> {
-    await db.transaction('rw', [db.categories, db.transactions, db.budgets, db.goals, db.plans], async () => {
+    await db.transaction('rw', [db.categories, db.transactions, db.budgets, db.goals, db.plans, db.settings], async () => {
       await Promise.all([db.transactions.clear(), db.budgets.clear(), db.goals.clear(), db.categories.clear(), db.plans.clear()]);
+      await db.settings.delete(MONTH_STARTS_KEY);
       await db.categories.bulkPut(SEED_CATEGORIES);
     });
   }

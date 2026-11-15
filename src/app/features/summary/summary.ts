@@ -1,10 +1,10 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { byCategory, inMonth, monthlySeries, totals } from '../../core/analytics';
 import { CategoriesStore } from '../../core/categories.store';
 import { TxKind } from '../../core/models';
+import { periodDays } from '../../core/periods';
 import { TransactionsStore } from '../../core/transactions.store';
-import { monthKey, parseISODate, today } from '../../core/util';
 import { Donut, DonutSlice, OTHER_ID, groupSlices } from '../../shared/charts/donut';
 import { MonthBars } from '../../shared/charts/month-bars';
 import { ClpPipe } from '../../shared/clp.pipe';
@@ -22,11 +22,12 @@ export class Summary {
   protected readonly txs = inject(TransactionsStore);
   private readonly cats = inject(CategoriesStore);
 
-  protected readonly month = signal(this.txs.currentMonth());
+  /** Sigue al mes actual (p. ej. al empezar un mes nuevo), pero se puede cambiar a mano. */
+  protected readonly month = linkedSignal(() => this.txs.currentMonth());
   protected readonly kind = signal<TxKind>('expense');
   protected readonly selected = signal<string | null>(null);
 
-  private readonly monthTxs = computed(() => inMonth(this.txs.all(), this.month()));
+  private readonly monthTxs = computed(() => inMonth(this.txs.all(), this.month(), this.txs.starts()));
   protected readonly t = computed(() => totals(this.monthTxs()));
   protected readonly slices = computed(() => byCategory(this.monthTxs(), this.cats.all(), this.kind()));
   protected readonly donut = computed<DonutSlice[]>(() =>
@@ -44,15 +45,11 @@ export class Summary {
   protected donutId(id: string): string {
     return this.shown().has(id) ? id : OTHER_ID;
   }
-  protected readonly series = computed(() => monthlySeries(this.txs.all(), this.month(), 6));
+  protected readonly series = computed(() => monthlySeries(this.txs.all(), this.month(), 6, this.txs.starts()));
 
   /** Gasto promedio por día transcurrido del mes. */
   protected readonly dailyAvg = computed(() => {
-    const m = this.month();
-    const isCurrent = m === monthKey(today());
-    const d = parseISODate(m + '-01');
-    const days = isCurrent ? new Date().getDate() : new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    return this.t().expense / days;
+    return this.t().expense / periodDays(this.month(), this.txs.starts(), this.txs.today());
   });
 
   protected readonly biggest = computed(() => {

@@ -3,7 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { BudgetsStore } from '../../core/budgets.store';
 import { CategoriesStore } from '../../core/categories.store';
 import { TransactionsStore } from '../../core/transactions.store';
-import { monthLabel } from '../../core/util';
+import { periodStart } from '../../core/periods';
+import { daysUntil, monthLabel, shiftMonth } from '../../core/util';
 import { ClpPipe } from '../../shared/clp.pipe';
 import { Sparks, Squiggle } from '../../shared/deco';
 import { Icon } from '../../shared/icon';
@@ -34,10 +35,9 @@ export class Budgets {
   protected readonly editor = signal<Editor | null>(null);
 
   protected readonly daysLeft = computed(() => {
-    this.txs.currentMonth();
-    const now = new Date();
-    const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    return last - now.getDate() + 1;
+    // Si el mes se empezó antes (p. ej. el 25), dura hasta que empiece el siguiente.
+    const end = periodStart(shiftMonth(this.txs.currentMonth(), 1), this.txs.starts());
+    return Math.max(1, daysUntil(end));
   });
 
   protected readonly perDay = computed(() => {
